@@ -168,7 +168,37 @@ BUG分支：
 
 		幸好，Git还提供了一个stash功能，可以把当前工作现场“储藏”起来，等以后恢复现场后继续工作：
 		$ git stash
-		注意：想修复主分支的bug，就需要在主分支上创建分支，需要将checkout回主分支
+		注意：想修复主分支的bug，就需要在主分支上创建分支，需要将checkout回主分支，再创建bug修复分支，修复完了再合并的主分支
+		修复完毕了以后，这时就可以切换回刚刚还没完成的工作分支dev：
+		$ git checkout dev
+		用git stash list命令看看：
+		$ git stash list
+		stash@{0}: WIP on dev: f52c633 add merge	
+		工作现场还在，Git把stash内容存在某个地方了，但是需要恢复一下，有两个办法：
+		一是用git stash apply恢复，但是恢复后，stash内容并不删除，你需要用git stash drop来删除；
+		另一种方式是用git stash pop，恢复的同时把stash内容也删了，删除后：
+		再用git stash list查看，就看不到任何stash内容了：
+		$ git stash list
+		但是，想一想dev也是主分支的分支，那么主分支的bug也会出现在当前的dev分支上，主分支的bug修复了，但是dev上的还没
+		那么，有什么办法使得dev的bug也能被修复了，难道还要在dev上建立一个分支吗？
+		答案是：不用那么麻烦
+		将之前修复主分支的那次提交修改“复制”到dev。
+		注意：我们只想复制4c805e2 fix bug 101这个提交所做的修改，并不是把整个master分支merge过来。
+		为了方便操作，Git专门提供了一个cherry-pick命令，让我们能复制一个特定的提交到当前分支：
+		$ git branch
+		* dev
+ 		 master
+		$ git cherry-pick 4c805e2
+		[master 1d4b803] fix bug 101
+		 1 file changed, 1 insertion(+), 1 deletion(-)
+		Git自动给dev分支做了一次提交，注意这次提交的commit是1d4b803，它并不同于master的4c805e2，因为这两个commit只是改动相同，但确实是两个不同的commit
+
+		小结
+		修复bug时，我们会通过创建新的bug分支进行修复，然后合并，最后删除；
+
+		当手头工作没有完成时，先把工作现场git stash一下，然后去修复bug，修复后，再git stash pop，回到工作现场；
+	
+		在master分支上修复的bug，想要合并到当前dev分支，可以用git cherry-pick <commit>命令，把bug提交的修改“复制”到当前分支，避免重复劳动。
 
 
 
