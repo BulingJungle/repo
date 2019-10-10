@@ -336,11 +336,50 @@ git 分支：
 			注意：标签总是和某个commit挂钩。如果这个commit既出现在master分支，又出现在dev分支，那么在这两个分支上都可以看到这个标签。
 			还可以创建带有说明的标签，用-a指定标签名，-m指定说明文字：
 			$ git tag -a v0.1 -m "version 0.1 released" 1094adb
+			$ git show v0.1			可以看到说明文字
 			
-			
-			
+			小结
+			命令git tag <tagname>用于新建一个标签，默认为HEAD，也可以指定一个commit id；
 
+			命令git tag -a <tagname> -m "blablabla..."可以指定标签信息；
 
+			命令git tag可以查看所有标签。
+			如果标签打错了，也可以删除：
+			$ git tag -d v0.1
+			Deleted tag 'v0.1' (was f15b0dd)
+			因为创建的标签都只存储在本地，不会自动推送到远程。所以，打错的标签可以在本地安全删除。
+			如果要推送某个标签到远程，使用命令git push origin <tagname>：
+			$ git push origin v1.0
+			或者，一次性推送全部尚未推送到远程的本地标签：
+			$ git push origin --tags
+			如果标签已经推送到远程，要删除远程标签就麻烦一点，先从本地删除：
+			$ git tag -d v0.9
+			然后，从远程删除。删除命令也是push，但是格式如下：
+			$ git push origin :refs/tags/v0.9
+			要看看是否真的从远程库删除了标签，可以登陆GitHub查看。
+			小结
+			命令git push origin <tagname>可以推送一个本地标签；
+
+			命令git push origin --tags可以推送全部未推送过的本地标签；
+
+			命令git tag -d <tagname>可以删除一个本地标签；
+
+			命令git push origin :refs/tags/<tagname>可以删除一个远程标签
+			
+使用github：
+			如何参与一个开源项目呢？比如人气极高的bootstrap项目，这是一个非常强大的CSS框架，你可以访问它的项目主页https://github.com/twbs/bootstrap，点“Fork”就在自己的账号下克隆了一个bootstrap仓库，然后，从自己的账号下clone：
+
+			git clone git@github.com:michaelliao/bootstrap.git
+		
+			一定要从自己的账号下clone仓库，这样你才能推送修改。如果从bootstrap的作者的仓库地址git@github.com:twbs/bootstrap.git克隆，因为没有权限，你将不能推送修改。			
+			
+			如果你希望bootstrap的官方库能接受你的修改，你就可以在GitHub上发起一个pull request。当然，对方是否接受你的pull request就不一定了。
+			小结
+			在GitHub上，可以任意Fork开源仓库；
+
+			自己拥有Fork后的仓库的读写权限；
+
+			可以推送pull request给官方仓库来贡献代码。
 
 
 
