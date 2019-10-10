@@ -144,16 +144,243 @@ git分支管理：
 		通常，合并分支时，如果可能，Git会用Fast forward模式，但这种模式下，删除分支后，会丢掉分支信息
 		如果要强制禁用Fast forward模式，Git就会在merge时生成一个新的commit，这样，从分支历史上就可以看出分支信息
 		所以就用，--no-ff方式的git merge
+
 		$ git merge --no-ff -m "merge with no-ff" dev
+
 		这次合并要创建一个新的commit，所以加上-m参数，把commit描述写进去
 		使用该模式最大的特点就是在merge分支后，仍然能保留分支的信息
 
 分支策略:
 		在实际开发中，我们应该按照几个基本原则进行分支管理：
-	
+
 		首先，master分支应该是非常稳定的，也就是仅用来发布新版本，平时不能在上面干活；
 		晚上
 
+		那在哪干活呢？干活都在dev分支上，也就是说，dev分支是不稳定的，到某个时候，比如1.0版本发布时，再把dev分支合并到master上，在master分支发布1.0版本；
+
+		你和你的小伙伴们每个人都在dev分支上干活，每个人都有自己的分支，时不时地往dev分支上合并就可以了。
+		
+		注意：合并分支时，加上--no-ff参数就可以用普通模式合并，合并后的历史有分支，能看出来曾经做过合并，而fast forward合并就看不出来曾经做过合并
+
+BUG分支：
+		在Git中，由于分支是如此的强大，所以，每个bug都可以通过一个新的临时分支来修复，修复后，合并分支，然后将临时分支删除在Git中，由于分支是如此的强大，所以，每个bug都可以通过一个新的临时分支来修复，修复后，合并分支，然后将临时分支删除
+		当你接到一个修复一个代号101的bug的任务时，很自然地，你想创建一个分支issue-101来修复它，但是，等等，当前正在dev上进行的工作还没有提交
+		并不是你不想提交，而是工作只进行到一半，还没法提交，预计完成还需1天时间。但是，必须在两个小时内修复该bug，怎么办？
+
+		幸好，Git还提供了一个stash功能，可以把当前工作现场“储藏”起来，等以后恢复现场后继续工作：
+		$ git stash
+		注意：想修复主分支的bug，就需要在主分支上创建分支，需要将checkout回主分支，再创建bug修复分支，修复完了再合并的主分支
+		修复完毕了以后，这时就可以切换回刚刚还没完成的工作分支dev：
+		$ git checkout dev
+		用git stash list命令看看：
+		$ git stash list
+		stash@{0}: WIP on dev: f52c633 add merge	
+		工作现场还在，Git把stash内容存在某个地方了，但是需要恢复一下，有两个办法：
+		一是用git stash apply恢复，但是恢复后，stash内容并不删除，你需要用git stash drop来删除；
+		另一种方式是用git stash pop，恢复的同时把stash内容也删了，删除后：
+		再用git stash list查看，就看不到任何stash内容了：
+		$ git stash list
+		但是，想一想dev也是主分支的分支，那么主分支的bug也会出现在当前的dev分支上，主分支的bug修复了，但是dev上的还没
+		那么，有什么办法使得dev的bug也能被修复了，难道还要在dev上建立一个分支吗？
+		答案是：不用那么麻烦
+		将之前修复主分支的那次提交修改“复制”到dev。
+		注意：我们只想复制4c805e2 fix bug 101这个提交所做的修改，并不是把整个master分支merge过来。
+		为了方便操作，Git专门提供了一个cherry-pick命令，让我们能复制一个特定的提交到当前分支：
+		$ git branch
+		* dev
+ 		 master
+		$ git cherry-pick 4c805e2
+		[master 1d4b803] fix bug 101
+		 1 file changed, 1 insertion(+), 1 deletion(-)
+		Git自动给dev分支做了一次提交，注意这次提交的commit是1d4b803，它并不同于master的4c805e2，因为这两个commit只是改动相同，但确实是两个不同的commit
+
+		小结
+		修复bug时，我们会通过创建新的bug分支进行修复，然后合并，最后删除；
+
+		当手头工作没有完成时，先把工作现场git stash一下，然后去修复bug，修复后，再git stash pop，回到工作现场；
+	
+		在master分支上修复的bug，想要合并到当前dev分支，可以用git cherry-pick <commit>命令，把bug提交的修改“复制”到当前分支，避免重复性劳动（fiexed）。
+
+git 分支：
+		软件开发中，总有无穷无尽的新的功能要不断添加进来。
+
+		添加一个新功能时，你肯定不希望因为一些实验性质的代码，把主分支搞乱了，所以，每添加一个新功能，最好新建一个feature分支，在上面开发，完成后，合并，最后，删除该feature分支。
+		
+		$ git branch -d feature-vulcan
+		error: The branch 'feature-vulcan' is not fully merged.
+		If you are sure you want to delete it, run 'git branch -D feature-vulcan'.
+		销毁失败。Git友情提醒，feature-vulcan分支还没有被合并，如果删除，将丢失掉修改，如果要强行删除，需要使用大写的-D参数。。
+多人协作：
+		要查看远程库的信息，用git remote：
+
+			$ git remote
+			origin
+		或者，用git remote -v显示更详细的信息：
+			$ git remote -v
+			origin  git@github.com:michaelliao/learngit.git (fetch)
+			origin  git@github.com:michaelliao/learngit.git (push)		
+		推送分支：
+			就是把该分支上的所有本地提交推送到远程库。推送时，要指定本地分支，这样，Git就会把该分支推送到远程库对应的远程分支上：
+				$ git push origin master
+			如果要推送其他分支，比如dev，就改成：
+				$ git push origin dev
+		但是，并不是一定要把本地分支往远程推送，那么，哪些分支需要推送，哪些不需要呢？
+			master分支是主分支，因此要时刻与远程同步；
+
+			dev分支是开发分支，团队所有成员都需要在上面工作，所以也需要与远程同步；
+
+			bug分支只用于在本地修复bug，就没必要推到远程了，除非老板要看看你每周到底修复了几个bug；
+
+			feature分支是否推到远程，取决于你是否和你的小伙伴合作在上面开发。
+
+			总之，就是在Git中，分支完全可以在本地自己藏着玩，是否推送，视你的心情而定！
+		抓取分支:
+				$ git clone git@github.com:michaelliao/learngit.git
+			你的小伙伴从远程库clone时，默认情况下，你的小伙伴只能看到本地的master分支。不信可以用git branch命令看看：
+				$ git branch
+				* master	
+			现在，你的小伙伴要在dev分支上开发，就必须创建远程origin的dev分支到本地，于是他用这个命令创建本地dev分支：
+				$ git checkout -b dev origin/dev
+			现在，他就可以在dev上继续修改，然后，时不时地把dev分支push到远程：
+				$git add env.txt
+				$ git commit -m "add env"
+				$ git push origin dev
+			你的小伙伴已经向origin/dev分支推送了他的提交，而碰巧你也对同样的文件作了修改，并试图推送：
+				$git add env.txt
+				$ git commit -m "add env"
+				$ git push origin dev
+				To github.com:michaelliao/learngit.git
+				 ! [rejected]        dev -> dev (non-fast-forward)
+				error: failed to push some refs to 'git@github.com:michaelliao/learngit.git'
+				hint: Updates were rejected because the tip of your current branch is behind
+				hint: its remote counterpart. Integrate the remote changes (e.g.
+				hint: 'git pull ...') before pushing again.
+				hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+			推送失败，因为你的小伙伴的最新提交和你试图推送的提交有冲突，解决办法也很简单，Git已经提示我们，先用git pull把最新的提交从origin/dev抓下来，然后，在本地合并，解决冲突，再推送：
+				$ git pull
+				There is no tracking information for the current branch.
+				Please specify which branch you want to merge with.
+				See git-pull(1) for details.
+   				git pull <remote> <branch>
+				If you wish to set tracking information for this branch you can do so with:
+   				git branch --set-upstream-to=origin/<branch> dev
+			git pull也失败了，原因是没有指定本地dev分支与远程origin/dev分支的链接，根据提示，设置dev和origin/dev的链接：
+				$ git branch --set-upstream-to=origin/dev dev
+				Branch 'dev' set up to track remote branch 'dev' from 'origin'
+			再pull：
+				$ git pull
+				Auto-merging env.txt
+				CONFLICT (add/add): Merge conflict in env.txt
+				Automatic merge failed; fix conflicts and then commit the result.
+			这回git pull成功，但是合并有冲突，需要手动解决，解决的方法和分支管理中的解决冲突完全一样。解决后，提交，再push：
+	
+			因此，多人协作的工作模式通常是这样：
+
+				首先，可以试图用git push origin <branch-name>推送自己的修改；
+	
+				如果推送失败，则因为远程分支比你的本地更新，需要先用git pull试图合并；
+
+				如果合并有冲突，则解决冲突，并在本地提交；
+
+				没有冲突或者解决掉冲突后，再用git push origin <branch-name>推送就能成功！
+
+				如果git pull提示no tracking information，则说明本地分支和远程分支的链接关系没有创建，用命令git branch --set-upstream-to <branch-name> origin/<branch-name>。
+
+				这就是多人协作的工作模式，一旦熟悉了，就非常简单。
+	
+			小结:
+				查看远程库信息，使用git remote -v；
+
+				本地新建的分支如果不推送到远程，对其他人就是不可见的；
+
+				从本地推送分支，使用git push origin branch-name，如果推送失败，先用git pull抓取远程的新提交；
+
+				在本地创建和远程分支对应的分支，使用git checkout -b branch-name origin/branch-name，本地和远程分支的名称最好一致；
+
+				建立本地分支和远程分支的关联，使用git branch --set-upstream branch-name origin/branch-name；
+
+				从远程抓取分支，使用git pull，如果有冲突，要先处理冲突。
+				还有一点：
+				git pull之后，需要git rebase以下，保证本地的分支成一条直线，再push到远端时会更好查看
+
+				小结
+				rebase操作可以把本地未push的分叉提交历史整理成直线；
+
+				rebase的目的是使得我们在查看历史提交的变化时更容易，因为分叉的提交需要三方对比。
+标签管理：
+			发布一个版本时，我们通常先在版本库中打一个标签（tag），这样，就唯一确定了打标签时刻的版本
+			每一个标签对应着每一个历史版本
+			标签的本质：它就是指向某个commit的指针（跟分支很像对不对？但是分支可以移动，标签不能移动）
+			Git有commit，为什么还要引入tag？	
+			“请把上周一的那个版本打包发布，commit号是6a5819e...”
+
+			“一串乱七八糟的数字不好找！”
+
+			如果换一个办法：
+
+			“请把上周一的那个版本打包发布，版本号是v1.2”
+
+			“好的，按照tag v1.2查找commit就行！”
+			所以，tag就是一个让人容易记住的有意义的名字，它跟某个commit绑在一起。
+			
+		创建标签：
+			首先，切换到需要打标签的分支上：
+			然后，敲命令git tag <name>就可以打一个新标签：
+			$ git tag v1.0		可以用命令git tag查看所有标签
+			默认标签是打在最新提交的commit上的
+			有时候，如果忘了打标签，比如，现在已经是周五了，但应该在周一打的标签没有打，怎么办？
+			方法是找到历史提交的commit id，然后打上就可以了：
+			比方说要对add merge这次提交打标签，它对应的commit id是f52c633，敲入命令：
+			$ git tag v0.9 f52c633
+			注意，标签不是按时间顺序列出，而是按字母排序的。可以用git show <tagname>查看标签信息
+			用命令git show <tagname>可以看到说明文字
+			注意：标签总是和某个commit挂钩。如果这个commit既出现在master分支，又出现在dev分支，那么在这两个分支上都可以看到这个标签。
+			还可以创建带有说明的标签，用-a指定标签名，-m指定说明文字：
+			$ git tag -a v0.1 -m "version 0.1 released" 1094adb
+			$ git show v0.1			可以看到说明文字
+			
+			小结
+			命令git tag <tagname>用于新建一个标签，默认为HEAD，也可以指定一个commit id；
+
+			命令git tag -a <tagname> -m "blablabla..."可以指定标签信息；
+
+			命令git tag可以查看所有标签。
+			如果标签打错了，也可以删除：
+			$ git tag -d v0.1
+			Deleted tag 'v0.1' (was f15b0dd)
+			因为创建的标签都只存储在本地，不会自动推送到远程。所以，打错的标签可以在本地安全删除。
+			如果要推送某个标签到远程，使用命令git push origin <tagname>：
+			$ git push origin v1.0
+			或者，一次性推送全部尚未推送到远程的本地标签：
+			$ git push origin --tags
+			如果标签已经推送到远程，要删除远程标签就麻烦一点，先从本地删除：
+			$ git tag -d v0.9
+			然后，从远程删除。删除命令也是push，但是格式如下：
+			$ git push origin :refs/tags/v0.9
+			要看看是否真的从远程库删除了标签，可以登陆GitHub查看。
+			小结
+			命令git push origin <tagname>可以推送一个本地标签；
+
+			命令git push origin --tags可以推送全部未推送过的本地标签；
+
+			命令git tag -d <tagname>可以删除一个本地标签；
+
+			命令git push origin :refs/tags/<tagname>可以删除一个远程标签
+			
+使用github：
+			如何参与一个开源项目呢？比如人气极高的bootstrap项目，这是一个非常强大的CSS框架，你可以访问它的项目主页https://github.com/twbs/bootstrap，点“Fork”就在自己的账号下克隆了一个bootstrap仓库，然后，从自己的账号下clone：
+
+			git clone git@github.com:michaelliao/bootstrap.git
+		
+			一定要从自己的账号下clone仓库，这样你才能推送修改。如果从bootstrap的作者的仓库地址git@github.com:twbs/bootstrap.git克隆，因为没有权限，你将不能推送修改。			
+			
+			如果你希望bootstrap的官方库能接受你的修改，你就可以在GitHub上发起一个pull request。当然，对方是否接受你的pull request就不一定了。
+			小结
+			在GitHub上，可以任意Fork开源仓库；
+
+			自己拥有Fork后的仓库的读写权限；
+
+			可以推送pull request给官方仓库来贡献代码。
 
 
 
@@ -167,6 +394,9 @@ git分支管理：
 
 
 
+
+
+			
 
 
 
