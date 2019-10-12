@@ -1,0 +1,111 @@
+AI的发展：从1950年开始兴起，经过20到年的发展，到1976年为止是人工智能的黄金期，此后，AI分发展经历过两次寒冬。
+	  此后，随着各种AI的实践项目的成功应用，AI慢慢再次步入公众的视野，特别是深度学习的概念出现以后。
+	  从1993年到至今，AI开始进行转折性地发展
+AI的应用：
+	机器视觉，图像处理，模式识别，VR/AR/MR，智能诊断，博弈论和策略规划，AI游戏，AI翻译，自然语言处理及聊天机器人等
+	另外的，还有其他领域也嵌套着AI的应用
+	
+在AI史上最关键的核心论文：A global geometric framework for nonlinear dimensinality reduction
+		 	 非线性降维的全局几何框架
+		  	 Nonelinear dimensionality reduction by locally linaer Embedding
+		  	 通过局部线性嵌入进行非线性降维
+		  	 Reducing dimensionality of date with neural networks
+		  	 通过神经网络来降低数据维度（重要）
+		  	 Clustering by fast search amd find of density peaks
+		  	 通过快速查找和发现峰值进行聚类
+		  	 Human-level concept learning though probabilistic program induction
+		  	 通过概率规划归纳法进行人类层级的概念学习
+		  	 Hhuman-level control through deep reinforcement learning
+		  	 通过深度强化学习来达到人类水平的控制
+		  	 deep learning
+		  	 深度学习的提出
+		  	 Mastering the game of go with deep neural networks and tree search
+		  	 利用深度神经网络和树搜索征服围棋游戏
+
+	idea：阅读发现其中的奥秘
+
+三种AI：弱AI，强AI，超AI
+	弱AI是无意识的AI，专注于某一个领域
+	强AI意味着机器将智能地处理任何问题，是AI研究的主要目标
+	超AI将远远超过人类的大脑的一种假定的智能体（至少现在是）
+		  	  
+approaches artificial intelligence：
+	
+	AI的六种途径：
+			Cybernetics and brain simulation（控制论和大脑仿真）
+			symbolic and sub-symbolic （符号和亚符号）
+			logical-based anti-logic（基于逻辑和反逻辑）
+			symbolism and connection（符号主义和联结主义）
+			statistical approach（统计方法）
+			intelligence agent paradigm（智能体范式）
+			
+		思考:	learned the six approaches for artificial intelligence，
+			do you think which one could be better，and why？
+			
+rational angent:
+	there are two common parts for every agent
+	A hunman agent
+		sensors: eyes,ear,etc
+		actuators:hand,foot,etc
+	robot agent			
+	software agent:
+		sensor/actuators
+	abstract intelligent agents
+inteligent agent should have thoes characteristics:
+	accomodate new problem sovling rules incrementally（逐渐适应）
+	Adapt online and in real time 
+	able to analyze itself in terms of bebavior ，error and success
+	learn to improve though interaction with environment
+	learn quickly from large ammount dates
+	有基于内存的样本存储和检索能力
+	have parameters to represent short and long term memory ，forgetting ，etc（）
+	
+	rational agents：do right things
+
+
+PEAS：一种任务环境的规范，代表：performance（性能），enviroment（环境），actuators（动作器），sensor（感知器）
+		eg.智能体类型如开车司机：
+				安全、快速、守法、舒适等作为一种性能方面的描述
+				道路、交通、行人、顾客作为环境的描述
+				方向盘、油门、刹车、喇叭等作为动作器的描述
+				速度仪、摄像头、里程表等作为感知器的描述
+
+structure of intelligent agent：				
+		agent function（抽象函数）：可以包含各种决策制定的原则
+		agent program(agent程序)：包括了agent function，它将感受器的输入作为当前的感知，然后返回一个动作个动作器（actuators）
+		
+		agent = platform + agent program
+		platform = computing device + sensors + actuators（执行器）
+		agent program 包含了 agent function
+	
+		 
+			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		  
+	
+	
