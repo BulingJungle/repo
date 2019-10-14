@@ -1,1 +1,1 @@
-this repository is used for git testing
+this repository is used for saving personal learning notes！

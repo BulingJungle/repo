@@ -1,4 +1,0 @@
-Git is a distributed version control system.
-Git is free wonderful software.
-hello china
-modify dev

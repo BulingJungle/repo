@@ -1,0 +1,235 @@
+AI的发展：从1950年开始兴起，经过20到年的发展，到1976年为止是人工智能的黄金期，此后，AI分发展经历过两次寒冬。
+	  此后，随着各种AI的实践项目的成功应用，AI慢慢再次步入公众的视野，特别是深度学习的概念出现以后。
+	  从1993年到至今，AI开始进行转折性地发展
+AI的应用：
+	机器视觉，图像处理，模式识别，VR/AR/MR，智能诊断，博弈论和策略规划，AI游戏，AI翻译，自然语言处理及聊天机器人等
+	另外的，还有其他领域也嵌套着AI的应用
+	
+在AI史上最关键的核心论文：A global geometric framework for nonlinear dimensinality reduction
+		 	 非线性降维的全局几何框架
+		  	 Nonelinear dimensionality reduction by locally linaer Embedding
+		  	 通过局部线性嵌入进行非线性降维
+		  	 Reducing dimensionality of date with neural networks
+		  	 通过神经网络来降低数据维度（重要）
+		  	 Clustering by fast search amd find of density peaks
+		  	 通过快速查找和发现峰值进行聚类
+		  	 Human-level concept learning though probabilistic program induction
+		  	 通过概率规划归纳法进行人类层级的概念学习
+		  	 Hhuman-level control through deep reinforcement learning
+		  	 通过深度强化学习来达到人类水平的控制
+		  	 deep learning
+		  	 深度学习的提出
+		  	 Mastering the game of go with deep neural networks and tree search
+		  	 利用深度神经网络和树搜索征服围棋游戏
+
+	idea：阅读发现其中的奥秘
+
+三种AI：弱AI，强AI，超AI
+	弱AI是无意识的AI，专注于某一个领域
+	强AI意味着机器将智能地处理任何问题，是AI研究的主要目标
+	超AI将远远超过人类的大脑的一种假定的智能体（至少现在是）
+		  	  
+approaches artificial intelligence：
+	
+	AI的六种途径：
+			Cybernetics and brain simulation（控制论和大脑仿真）
+			symbolic and sub-symbolic （符号和亚符号）
+			logical-based anti-logic（基于逻辑和反逻辑）
+			symbolism and connection（符号主义和联结主义）
+			statistical approach（统计方法）
+			intelligence agent paradigm（智能体范式）
+			
+		思考:	learned the six approaches for artificial intelligence，
+			do you think which one could be better，and why？
+			
+rational angent:
+	there are two common parts for every agent
+	A hunman agent
+		sensors: eyes,ear,etc
+		actuators:hand,foot,etc
+	robot agent			
+	software agent:
+		sensor/actuators
+	abstract intelligent agents
+inteligent agent should have thoes characteristics:
+	accomodate new problem sovling rules incrementally（逐渐适应）
+	Adapt online and in real time 
+	able to analyze itself in terms of bebavior ，error and success
+	learn to improve though interaction with environment
+	learn quickly from large ammount dates
+	有基于内存的样本存储和检索能力
+	have parameters to represent short and long term memory ，forgetting ，etc（）
+	
+	rational agents：do right things
+
+
+PEAS：一种任务环境的规范，代表：performance（性能），enviroment（环境），actuators（动作器），sensor（感知器）
+		eg.智能体类型如开车司机：
+				安全、快速、守法、舒适等作为一种性能方面的描述
+				道路、交通、行人、顾客作为环境的描述
+				方向盘、油门、刹车、喇叭等作为动作器的描述
+				速度仪、摄像头、里程表等作为感知器的描述
+
+structure of intelligent agent：				
+		agent function（抽象函数）：可以包含各种决策制定的原则
+		agent program(agent程序)：包括了agent function，它将感受器的输入作为当前的感知，然后返回一个动作个动作器（actuators）
+		
+		agent = platform(HARDWARE) + agent program(SOFTWARE)(含function规则)
+		platform = computing device + sensors + actuators（执行器）
+		agent program 包含了 agent function
+		agent的三种状态：
+			原子状态（atomic）	黑盒，不用关系内部	eg.如城市网中的城市
+			因子（factored）	有固定的值的集合和属性	eg.澳洲的版图（三色代表不同城市）
+			结构（structured）	对象的关联组合		eg.结构化表示
+Chapter2.section.1：
+	
+	5种智能体的agent：
+			简单反射智能体
+			基于模型的反射智能体
+			基于目标的~
+			基于效用的~
+			学习智能体
+			其他
+	以上的几种智能体是基于：感知的智能和能力的程度，以及对环境的作用的不同
+	
+	一、简单反射agent
+			
+			基于当前的感知，忽略历史的影响
+			
+			基于条件规则（condition based）：if condition then action
+			
+			补充：外部环境完全可观测时，才可以使用
+			
+			      外部环境可观测情况下，无限循环不可避免		？
+			      如果智能体可以有随机动作，那么可以摆脱无限循环	？
+			
+			 该agent的function：
+				三参数：状态（state）		当前外部状态的理解
+					规则（条件动作规则）	
+					action（最近动作）	初始值为空
+				三步骤：
+					1.将感知转化为状态
+					2.通过规则匹配函数将状态和规则作为输入，找到匹配规则
+					3.根据规则找到动作
+	二、基于模型的反射agent：
+			区别与简单反射agent：可以处理部分可观测环境
+			增加状态存储，环境演变信息等
+			为何是模型反射agent：关于外部环境如何运作的知识称为一个“外部环境模型”
+			
+			算法：
+				输入：state（对当前外部状态的理解）
+				      rules （description of how the next state depends on current state and action）
+					    （下一个状态是如何依赖当前状态和动作的描述）
+				      action
+				      +model
+				
+				操作：在获取state的时候，引入了model参数，这是区别于简单反射agent的重要区别
+				      state 	<---	UPDATE-STATE(state，action，precept，model)
+				      rule 	<---	RULE-MATCH(state,rule)
+				      action 	<---	rule.Action
+				      return	action
+				
+				
+	三、基于目标的agent（goal based agent）
+
+			扩展了基于模型的agent的功能
+			
+			增加了：对目标动作执行后的考虑		      
+			
+			goal information describes situation that are desireable（目标信息所期望描述的情形）
+			
+			this allowed the agent a way to choose among multiple possibility，selecting one which reaches 
+			a goal state（它允许在多种可能性中找到一种方式，选择一种来达到目标的状态）
+
+			planning and searching is a subfileds of artificial intelligence devoted to finding action 
+			sequences that achieve the agent's goals.  	（计划和搜索是AI的一个子领域，致力于找到可以实现目标的动作序列）
+			
+			in some cases, the goal-based agent appears to be less efficient（在一些情况下，基于目标的智能体似乎不太有效）
+			it is more flexible because the knowledge that support its decisions is represented explicitly
+			and can be modified.	(它具有灵活性因为支持它决策的知识能被明显地表现出来，而且能被修改)
+
+			devoted to（prep）致力于	appears to似乎		explicitly明显的
+			
+						
+	四、基于效用的agent
+			
+			a particular state can obtained by a utility function which maps a state to a measure of utility of the state.
+			
+			一种特殊的状态可以通过一种效用函数得到，该函数将一种状态映射到该状态效用的度量。
+			
+			关键词：utility function（效用函数）
+			
+			about agent：
+					> 该种agent可进行性能度量，可度量性能程度，并且对于不同外部环境状态进行比较
+					> 效用：描述性能的深度，如：多么高兴
+					> 期待效用的最大化
+					> 该agent需要建模，记录环境，任务轨迹。涉及大量感知、表征、推理、学习的研究
+	五、学习agent（*）
+			
+			能在未知环境中初始运行，并且随着时间推移，与初始状态相比，越来越胜任
+			
+			对外部感知环境感知评价，可以自我改善
+			
+			要素：
+				> 学习要素：“评论者”对智能体如何动作的反馈，来决定性能的修改
+				> 性能要素：获得感知并且决定动作
+				> 问题发生器：负责推荐问题，形成新的经验
+			
+			
+			深度学习强化-->游戏，超越人类		关键词：外部环境回报值（award）
+	六、其他agent
+			.决策agent		与决策制定相关	
+
+			.输入agent		处理和理解感受器的输入
+			
+			.加工agent 		解决诸如语音识别的问题
+			
+			.空间智能体		与物理显示有关
+
+			.时间智能体		基于时间信息提供指令
+			
+			.世界智能体		
+
+	七、其他专用智能体
+				
+			.购物智能体		
+			
+			.客户服务台
+		
+			.个人智能体
+	
+			.数据挖掘智能体
+
+	各种agent及各自关系：
+			
+			intelligent agent 含：	
+		
+
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		  
+	
+	
