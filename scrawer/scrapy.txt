@@ -2,4 +2,11 @@ scrapy写给程序员使用的，使用使用命令行的方式
 	命令行格式：scrapy [控制类型][option][arg]
 becaz：更易控制，适合脚本控制
 	给程序员用的
+
+安装：
+	安装之前需要安装其各个依赖项
+
+	最后执行，
+		$pip install scrapy
+	
 	

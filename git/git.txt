@@ -559,9 +559,20 @@ git 分支：
    				 要像SVN那样变态地控制权限，用Gitolite。
 			
 
-
-
-
+		补充：从git上克隆部分文件到本地，使用Sparse Checkout模式
+				$mkdir project_folder
+				$cd project_folder
+				$git init
+				$git remote add -f origin <url>		
+				接下来，我们在Config中允许使用Sparse Checkout模式：
+				$git config core.sparsecheckout true
+				接下来你需要告诉Git哪些文件或者文件夹是你真正想Check Out的，你可以将它们作为一个列表保存在.git/info/sparse-checkout文件中。 
+				例如：
+					$echo “libs” >> .git/info/sparse-checkout
+					$echo “apps/register.go” >> .git/info/sparse-checkout
+					$echo “resource/css” >> .git/info/sparse-checkout
+				最后，你只要以正常方式从你想要的分支中将你的项目拉下来就可以了：
+					$git pull origin master
 
 
 
