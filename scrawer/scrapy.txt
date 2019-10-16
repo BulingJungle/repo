@@ -2,11 +2,138 @@ scrapy写给程序员使用的，使用使用命令行的方式
 	命令行格式：scrapy [控制类型][option][arg]
 becaz：更易控制，适合脚本控制
 	给程序员用的
+	
+scrapy的安装：网上教程多。参考一篇blog:https://blog.csdn.net/woshixianlaid/article/details/90754550
 
-安装：
-	安装之前需要安装其各个依赖项
+scrapy框架：5+2结构
 
-	最后执行，
-		$pip install scrapy
+创建工程：
+	$scrapy startproject 工程名字	（假设为crawler01）
+
+就会在相关文件目录下创建一个crawler01的工程
+
+crawler01文件夹下
+		有一个.cfg文件，该文件通常是配置文件，该文件处于项目根目录。是为了部署爬虫而存在的。本机不需要改变部署配置文件。
+
+		另外有一个文件夹，该文件夹为框架的用户自定义代码存放处，内又有若干文件：
+			
+			__init__.py		初始化脚本，不需要编写
+			items.py 		Items代码模块（继承类），一般不需要编写
+			middlewares.py		代码模板（继承类），可扩展
+			pipeline.py		pipeline模块，对于模板（继承类）
+			setting.py		爬虫配置文件
+			spiders目录		存放工程所创建的爬虫
+			
+			在spiders目录内：
+				__init__.py		初始化文件无需修改
+				__pycache__.py		缓存目录，无需修改
+
+创建爬虫生成py文件（也可手动创建）：
+	$scrapy genspider <爬虫名字> <工程名.io>
+	
+	
+	C:\Users\admin\stuckCrawer>scrapy genspider spider_01 stuchCrawer.io
+		Created spider 'spider_01' using template 'basic' in module:
+  		stuckCrawer.spiders.spider_01
+
+	注意：命令行需要进入爬虫根目录后，才可创建spider.py到spiders文件夹内
+		
+	创建的这个spider内有段起始代码：
+			# -*- coding: utf-8 -*-
+			import scrapy
+
+
+			class Spider01Spider(scrapy.Spider):
+   				 name = 'spider_01'
+    				allowed_domains = ['stuchCrawer.io']
+    				start_urls = ['http://stuchCrawer.io/']
+
+    				def parse(self, response):
+      					  pass
+	
+	说明:自动创建一个spider类，该类继承自scrapy.Spider
+	     name为当前爬虫的名称，allowed_domains最开始用户给命令行的域名，指在爬取网站的时候，只能爬取该域名下的相关链接
+	     start_url也就是框架中，spider的起始页面
+	     parse用于解析网页，需要编写
+
+	接下来就可以修改创建的spider.py文件，进行配置爬虫
+		# -*- coding: utf-8 -*-
+		import scrapy
+
+
+		class Spider01Spider(scrapy.Spider):
+    			name = 'spider_01'
+    			allowed_domains = ['stuchCrawer.io']
+   			 start_urls = ['http://stuchCrawer.io/']
+
+    			def parse(self, response):
+    				#爬取网页并保存
+       				 fname = response.url.split("/")[-1]
+        			with open(fname,'wb') as f:
+        				f.write(response.body)
+      				self.log('Saved file %s'.format(name))
+
+	编写好后，运行爬虫：
+		 $ scrapy crawl spider_01
+	爬取好页面以后，编写item pipeline
+	
+	补充：
+		三个类：request类，response类，item类
+		1.request类
+			request对象为一个http请求，由spider生成，由Downloader执行
+			属性：  .url		请求对应的地址
+				.method		对应请求的方法（get，put等）
+				.headers	字典类型的请求头
+				.body		请求内容的主体，一般为字符串
+				.meta		用户添加的扩展信息，在scrapy内部模块间传递信息使用
+				.copy（）	复制该请求
+
+		2.response类
+			由Downloader生成，由Spider处理				
+			response对象表示http响应
+			属性和方法：
+				.url		返回所关联的地址
+				.status		返回状态码，默认200（成功）
+				.headers	返回的头部信息		
+				.body		返回对应的内容信息，字符串类型
+				.flags		一组标记
+				.request	产生response类型对应的request对象
+				.copy()		复制该响应
+
+		3.item类（类字典类型）
+			class scrapy.item.Item（）
+
+			item对象表示一个从HTML页面中提取的信息内容
+
+			有Spider生成，由Item Pipeline处理 
+			
+			spider将信息以键值对封装为字典，这就是item
+
+		HTML页面提取信息方法：
+			Beautiful soup
+			re
+			lxml		
+			XPath Selector
+			CSS Selector（选择）
+
+		CSS Selector：	W3C维护
+			<HTML>.css('a::attr(href)').extract()			
+			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	
 	
