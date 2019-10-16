@@ -96,7 +96,7 @@ crawler01文件夹下
 				.status		返回状态码，默认200（成功）
 				.headers	返回的头部信息		
 				.body		返回对应的内容信息，字符串类型
-				.flags		一组标记
+					.flags		一组标记
 				.request	产生response类型对应的request对象
 				.copy()		复制该响应
 
@@ -116,16 +116,35 @@ crawler01文件夹下
 			XPath Selector
 			CSS Selector（选择）
 
-		CSS Selector：	W3C维护
-			<HTML>.css('a::attr(href)').extract()			
+		CSS Selector：	（W3C维护）
+
+			CSS 选择标签的属性：
+			<HTML>.css('a::attr(href)').extract()	#提取返回页面中的a标签的链接，可迭代对象
+			
+			CSS 选择标签中的文本：
+				>>> response.css('title::text').extract()				
+			
+	补充：
+		$scrapy genspider [option] <name> [domain]
+	
+		其中的option可以查看文档
+
+		eg.scrapy genspider -t basic/crawl BDspider www.baidu.com		使用basic模板创建spider，入口域名为www.daidu.com
+			
+		findall(pattern, string, flags=0)		返回string中所有与pattern相匹配的全部字串，返回形式为列表
+
+		scrapy 中css selector：
+			 <title>爬虫实验室 - SCRAPY中文网提供</title>
+
+			response.css('title').extract（） 	 ['<title>爬虫实验室 - SCRAPY中文网提供</title>']
+			response.css('title').extract_first()	 '<title>爬虫实验室 - SCRAPY中文网提供</title>'
+			所有，就用下面这个来一部到位地提取：
+				response.css('title::text').extract_first()	'爬虫实验室 - SCRAPY中文网提供'		
+			
 			
 
-
-
-
-
-
-
+Items：
+		
 
 
 
