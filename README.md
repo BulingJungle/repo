@@ -1,1 +1,1 @@
-this repository is used for saving personal learning notes！
+this repository is used for saving learning notes！
