@@ -2814,7 +2814,7 @@ MySQLday02:
 		2）逻辑比较：
 			and	两个或多个同时满足条件
 			or	两个或多个有则满足
-			
+			注意：嵌套使用时要用括号，否则优先级得不到保障
 			eg.select name,gongji from sanguo where gongji>=200 and country="蜀国";
 			eg.mysql > select *from sanguo 
    				-> where 
@@ -2827,7 +2827,7 @@ MySQLday02:
 			空：is null
 			非空：is not null
 			注意：
-				null空值，必须用is /is not匹配
+				null空值，必须用is /is not匹配，is not null是匹配所有非NULL值的记录，包括""和非空字符串
 				""，空字符串，必须用where 字段值=""的形式
 			
 			eg.查找姓名为NULL的蜀国女英雄信息
@@ -2842,10 +2842,10 @@ MySQLday02:
 			_:匹配一个字符
 			%:匹配0到多个字符
 			
-			eg.select * from sanguo where name="_%_"	匹配名字至少为两个字符以上的英雄
-			   select * from sanguo where name="%"		匹配名字为空或多个字符的英雄，注意：NULL（空值）不会被匹配
-			   select * from sanguo where name="___"	匹配名字为三个字符的
-			   select * from sanguo where name="赵%"	匹配所有姓赵的英雄
+			eg.select * from sanguo where name like "_%_"	匹配名字至少为两个字符以上的英雄
+			   select * from sanguo where name like "%"		匹配名字为空或多个字符的英雄，注意：NULL（空值）不会被匹配
+			   select * from sanguo where name like "___"	匹配名字为三个字符的
+			   select * from sanguo where name like "赵%"	匹配所有姓赵的英雄
 
 		5）正则表达式匹配查询：非常强大	需要牢记格式语法
 			格式：where 字段名 regexp "正则表达式"
@@ -2858,13 +2858,130 @@ MySQLday02:
 			* :  星号前的字符出现0次或多次	如：^赵.*	以赵开头，后面跟上可以是0个或多个任意字符
 			
 			
+			eg.将name中带有数字的筛选出来
+			  mysql  > select name from sanguo
+    				-> where 
+			        -> name regexp "[0-9]";
+			其他例子：
+				where name regexp "^[0-9]"	匹配名字以数字开头的记录
+			 	where name regexp "[0-9]$"	名字中以数字结尾的
+				where name regexp "^司.*懿"	匹配名字司开头，以懿结尾的，中间任意字符
+				where name regexp "..."		匹配任意三个字符的名字
 
+		sql查询总结：
+		
+			完整SQL查询表达式结构：
+			select ... 聚合 from 表名
+			where ...				先筛选
+			group by ...				再分组
+			having ...				再聚合
+			order by ...				再排序
+			limit ...				限制查询结果的个数
+				
 
+			a.order by
+				给查询结果排序
+				格式：order by 字段名 排序方式
+				排序方式：升序（ASC，默认）	降序（DESC）	
+				注意：order by 写在最后，最后才进行查询
+				eg.
+					将英雄的防御值由低到高排序
+					mysql > select * from sanguo 
+    					     -> order by fangyu ASC;
+					将蜀国英雄按攻击值从高到低排序
+					mysql> select * from sanguo where country ="蜀国"  order by gongji DESC;
+					将魏蜀两国的男英雄名字中名字为三个字的英雄按防御值升序排列
+					 mysql> select * from sanguo  where country in("魏国","蜀国") and sex = "man" and name like "___" order by fangyu asc;
+						
+					
+			 b.limit （永远放在sql语句最后）		
+				作用：限制你需要的记录个数
+				用法：limit n		显示前n条
+				      limit m,n		从第m+1条开始（因为从0开始计数），显示n条记录，m相当于C数组下标
+				eg.查找防御值倒数第2名到倒数第四名的蜀国英雄记录
+				  mysql  > select * from sanguo 
+    					-> where country ="蜀国"
+   					-> order by fangyu asc
+    					-> limit 2,3;
+ 				    查找攻击值前三名且名字不为空的蜀国英雄的姓名，攻击值，和国家
+					mysql    > select name ,gongji ,country from sanguo
+    						-> where country="蜀国" and name !=""
+    						-> order by gongji desc
+    						-> limit 0,3;
+	
+			c.聚合函数
+				分类：	
+					1）avg（字段名）	：求字段的平均值
+					2）sum（字段名）	:求和
+					3）max 与 min(字段名)	：求最值
+					4）count（字段名）	：取字段的记录个数
+					例子：
+						统计id和name字段的个数
+						select count（id）,count（name） from sanguo;
+						mysql> select count(id) as IDNumber from sanguo;
+						+----------+
+						| IDNumber |
+						+----------+
+						|        9 |
+						+----------+
+					注意:as取的别名；NULL空值不会被统计，但空字符串会被统计
+				             count（*）可以统计所有，但不建议这样使用
 
+						统计蜀国英雄中攻击值大于200的英雄数量
+						select count（*）from sangguo	
+						where gongji>200 and country ="蜀国";	
+						mysql    > select count(*) from sanguo 
+   							 -> where 
+   							-> country ="蜀国" and gongji>200;
+						+----------+
+						| count(*) |
+						+----------+
+						|        2 |
+						+----------+
+						1 row in set (0.04 sec)
+			d.group by 分组
+				给查询的结果进行分组，一般和聚合函数一起使用
+				例子：统计三国表中有几个国家，再根据国家进行分组
+					select country from sanguo group by country
+					+---------+
+					| country |
+					+---------+
+					| 吴国    |
+					| 蜀国    |
+					| 魏国    |
+					+---------+
 
+				注意：group by 先分组再聚合
 
+				例子:计算所有国家的平均攻击力
+				     先进行分组，再算各个国家的平均攻击力
+				      mysql > select country ,avg(gongji) from sanguo
+   					   -> group by country;
+					+---------+-------------+
+					| country | avg(gongji) |
+					+---------+-------------+	
+					| 吴国    |    100.0000 |
+					| 蜀国    |    440.5000 |
+					| 魏国    |    392.5000 |
+					+---------+-------------+
+					执行过程是：先分组（还未去重）	group by country
+						    再聚合（求攻击力的平均值）	
+						    最后去重
+				 例子：查找所有国家中，英雄数量最多的前两名
+					mysql> select country ,count(name) from sanguo
+    					    -> group by country
+  					    -> order by count(name) desc;
+					+---------+-------------+
+					| country | count(name) |
+					+---------+-------------+
+					| 蜀国    |           5 |
+					| 魏国    |           2 |
+					| 吴国    |           1 |
+					+---------+-------------+
+					3 rows in set (0.01 sec)
+				
 
-
+	
 
 
 
