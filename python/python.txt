@@ -2822,9 +2822,34 @@ MySQLday02:
 
 			where 字段名 in(值1,..,值N)		筛选字段名=值1，及字段名=值N	、			
 			where 字段名 not in（值1，...，值N）	筛选出字段名不等于括号中的属性的部分
+		
+		3)范围内比较：
+			1.运算符
+				between，and，in，not in
+			2.语法：
+				between 值1 and 值2	一般值为数值
+				in（值1，值2，..,值N）	值可为数字，可为字符串
+				not（值1,...,值N）	同上
+				
+				eg.查找攻击值在100-200之间的蜀国英雄信息
+					mysql > select*from sanguo 
+   					     -> where 
+    					     -> country="蜀国" and gongji between 100 and 200;
+
+				eg.找到蜀国和吴国以外国家的女英雄信息	
+		
+					mysql >  select *from
+    					     ->  sanguo
+    					     ->  where 
+    					     ->  sex='woman' and country not in("蜀国","吴国");
+
+				eg.找到编号为1,3,5的蜀国英雄和貂蝉的编号，姓名，国家
+					mysql > select id,name,country from sanguo
+    					     -> where
+    					     -> (id in(1,3,5) and country="蜀国") or name="貂蝉";
 
 		3) 匹配空和非空：
-			空：is null
+			 空：is null
 			非空：is not null
 			注意：
 				null空值，必须用is /is not匹配，is not null是匹配所有非NULL值的记录，包括""和非空字符串
@@ -2873,8 +2898,8 @@ MySQLday02:
 			完整SQL查询表达式结构：
 			select ... 聚合 from 表名
 			where ...				先筛选
-			group by ...				再分组
-			having ...				再聚合
+			group by ...				再分组，再聚合
+			having ...				再筛选
 			order by ...				再排序
 			limit ...				限制查询结果的个数
 				
@@ -2902,7 +2927,7 @@ MySQLday02:
 				  mysql  > select * from sanguo 
     					-> where country ="蜀国"
    					-> order by fangyu asc
-    					-> limit 2,3;
+    					-> limit 1,3;
  				    查找攻击值前三名且名字不为空的蜀国英雄的姓名，攻击值，和国家
 					mysql    > select name ,gongji ,country from sanguo
     						-> where country="蜀国" and name !=""
@@ -2941,7 +2966,7 @@ MySQLday02:
 						1 row in set (0.04 sec)
 			d.group by 分组
 				给查询的结果进行分组，一般和聚合函数一起使用
-				例子：统计三国表中有几个国家，再根据国家进行分组
+				例子： 
 					select country from sanguo group by country
 					+---------+
 					| country |
@@ -2980,9 +3005,105 @@ MySQLday02:
 					+---------+-------------+
 					3 rows in set (0.01 sec)
 				
+		e.having 
+			作用：对条件的进一步筛选（类似于where ，但where处理不了的筛选）
+			       
+			注意：where只能对表中原始数据进行一定的筛选，但要是用聚合函数后再对算出的数据进行筛选就用having
+
+			例子：找出平均攻击力大于105的国家的前两名，显示国家名称和平均攻击力
+			      
+				mysql	 > select country,avg(gongji) as avg_gongji from sanguo
+    					-> group by country
+    					-> having avg_gongji > 105
+   				        -> order by avg_gongji desc
+    					-> limit 2;
+				+---------+------------+
+				| country | avg_gongji |
+				+---------+------------+
+				| 蜀国    |   440.5000 |
+				| 魏国    |   392.5000 |
+				+---------+------------+
+			说明：group by 一般对字段进行分组，聚合函数对分组后的数据进行进一步地操作，如：计算各组平均数avg，
+			求和sum，计数count等，而having对聚合后数据地再次筛选，比如像上面的例子一样，筛选出gongji大于105
+			的平均数所在的国家
+
+			例子：
+				
+				mysql> select sex,avg(gongji) from sanguo group by sex;
+				+-------+-------------+
+				| sex   | avg(gongji) |
+				+-------+-------------+
+				| man   |    265.2857 |
+				| woman |    835.5000 |
+				+-------+-------------+
+
+
+	distinct：
+		可以用于去除，当然group by分组也可以去重
+		使用：sanguo表中有几个国家
+		      select distinct country from sanguo	去除国家的重复的
+		      select distinct country ，name from 	当country和name对应的一行数据有与之完全相同的一行才被去重
+		例子：计算蜀国有多少个英雄
+			mysql	  >  select count(distinct name) from sanguo 
+   				 ->  where country ="蜀国";
+		
+		注意：distinct不能对任何字段作聚合处理
 
 	
+	在查询表的时候可以做数学运算：
+			1.运算符
+				+ - * /
+			2.例子：
+				在查询显示英雄攻击时*10
+				 select name,gongji*10,country from sanguo;
+				
+		
 
+	约束：
+		约束通常是创建表时，给与字段约束
+		1.作用:在插入数据到表时，限制约束输入，以保障数据的有效性，完整性，一致性
+		2.约束的分类：
+			1）默认约束（default）：
+				说明：在插入时如果不给值，那么自动设置默认值; 通常是在创建表的时候，指定默认值
+				格式：字段名 数据类型 default 默认值
+				例子1: 修改字段sex的类型 并设置默认值
+					alter table classmates modify sex enum("男","女","保密") default "保密";
+			2）非空约束：
+				说明：不允许字段有空值
+				格式：字段名 数据类型 not null
+			3）索引（很重要）：	
+				优缺点要知道！
+				定义：对数据库中表的一列或者多列的值进行排序的一种结构（MYSQL中索引用Btree方式）
+				       BTree：	
+						
+				优点：加快数据检索速度，减少了很多无效的查询。
+				缺点：a.因为表中的数据随时可能在更新，那么整个索引就要动态地不断变化，就需要不断维护，
+				      间接影响查询速度
+				      b.索引需要占用物理存储空间（/var/lib/mysql）
+				
+				示例：
+					1.执行insert.py文件在数据库中插入一百万条记录，字段有两个
+					2.开启性能测试：show variables like "%pro%"
+					  将其中的profiling设置为1：set profiling = 1;
+					3.执行查询语句：select name from t1 where name = "lucy999999";
+					4.查看性能分析结果：show profiles;	
+				          结果为0.332s
+					（此时还未加索引）
+					5.添加索引:create index name on t1;	
+					  创建索引后：desc t1;查看表结构发现：多了key列，在对应的name字段下，多了mul
+					  MUL：即为name字段添加的索引
+					6.现在,添加索引后,执行：select name from t1 where name ="lucy9999999"
+					7.执行：show profiles;
+					  查询分析结果
+					  结果为：0.019s			
+				
+					8.所以，这就是差别！至少目前，无它不行！查询时候非常关键！性能~
+		
+
+			课后面试题：mysql > select use_id,count(commit_id) from comment
+   					 -> group by use_id
+    				  	 -> order by count(commit_id) desc
+   					 -> limit 10;
 
 
 
