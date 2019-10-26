@@ -2877,6 +2877,10 @@ MySQLday02:
 			^:  以...开头
 			$:  以...结尾
 			.： 匹配任意一个字符
+			      中文三个字节
+			注意：mysql5.7.21中，正则表达式中.匹配的是字节
+			      mysql8.0中，正则表达式中点匹配的是字符
+			
 			[]: 包含...内容，匹配[]号内任意一个。如：[0-9]  匹配数字
 								 [a-z]	匹配字母小写	
 								 [A-Z]  匹配字母大写
@@ -3071,7 +3075,7 @@ MySQLday02:
 			2）非空约束：
 				说明：不允许字段有空值
 				格式：字段名 数据类型 not null
-			3）索引（很重要）：	
+			3）索引（很重要）：	 
 				优缺点要知道！
 				定义：对数据库中表的一列或者多列的值进行排序的一种结构（MYSQL中索引用Btree方式）
 				       BTree：	
@@ -3105,7 +3109,136 @@ MySQLday02:
     				  	 -> order by count(commit_id) desc
    					 -> limit 10;
 
+索引
+		分类：普通索引，唯一索引，主键索引，外键索引
+		
+		1.普通索引（index）
+			使用规则：一张表中可以为多个字段设置index索引；
+				  字段值没有约束（可以有重复，有空）；
+				  常需要查询的字段可以设置索引
 
+			index字段的key标志位：MUL
+			
+			创建表时添加索引：create table t1（
+						id smallint,						.
+						index(id));
+			在已有表中为字段添加索引名：create index 索引名 on 表名（字段名）;		#索引名一般和字段名一样
+			
+			查看索引：desc 表名； 或者 show index from 表名[\G];
+
+			删除索引:drop index 索引名 on 表名;
+
+			注意:删除普通索引，只能一个一个删除
+
+		2.唯一索引（unique）
+
+			使用规则：一个表中可以有多个unique字段；unique字段不予许有重复值，但可以为空；
+			标志位：UNI
+			创建：
+				创建表时：create table 表名（ID smallint，unique（ID));
+				已有表中：create unique index 索引名 on 表名（字段名）;
+			查看：desc 表名  或  show index from 表名;
+			
+			删除：drop index 索引名 on 表名;
+
+		3.主键索引（primary key）  & 自增长属性（比如id，添加一项自动增加1）
+
+			使用规则：一个表中只有一个主键，通常是把记录ID的字段设置为主键，每个值都是唯一的；对应字段的值不允许重复和空值
+			key标志：PRI
+			主键：唯一标识一条记录
+			创建：
+				创建表时创建：create table 表名(
+							 	... ... ,
+							 	字段名 数据类型 primary key auto_increment,
+							 	... ...
+								);
+							也可以：create table 表名(
+							 	... ... ,
+							 	id smallint auto_increment,
+							 	name varchar(20),
+							 	primary key(id,name)	#复合主键，一般一个表中只有一个主键。基本很少使用
+							 	）；
+							 eg.mysql>  create table t1(
+  	  								-> id int primary key auto_increment,
+  								    -> name char(20))auto_increment=10;		#指定id从10开始编号
+								Query OK, 0 rows affected (0.06 sec)
+
+								mysql> desc t1;	
+								+-------+----------+------+-----+---------+----------------+
+								| Field | Type     | Null | Key | Default | Extra          |
+								+-------+----------+------+-----+---------+----------------+
+								| id    | int(11)  | NO   | PRI | NULL    | auto_increment |
+								| name  | char(20) | YES  |     | NULL    |                |
+								+-------+----------+------+-----+---------+----------------+
+								2 rows in set (0.01 sec)
+				在已有表中创建主键：
+						alter table 表名 add primary key（字段名）；
+						添加自增长属性：alter table 表名 modify 字段名 数据类型 auto_increment;				
+
+			删除主键：
+				设置了自增长属性的字段，要想其主键被删除掉，首先删除自增长属性auto_primary
+				先删除自增长属性（modify）：
+				alter table 表名 modify id int;
+				再删除主键：
+				alter table 表名 drop primary key;
+
+		外键索引
+
+			作用：保证数据一致性。让多张表关联起来
+			定义 让当前表字段的值在另外一个表的范围内选择
+			语法：
+				foreign key(参考字段名)					#当前表
+				references 被参考表名（被参考字段名）		#参考表
+				on delete 级联动作
+				on update 级联动作
+			例子：
+				有两张表：						
+					表1:缴费信息表（财务）（主表）
+					学号 	姓名 	班级  	金额
+					 1    	唐伯虎	一班		2000
+					 2		秋香		一班		1999
+
+					 表2：学生信息表（班主任）（从表）
+					 学号	姓名  	缴费金额
+					 1		唐伯虎	2000
+					 2		秋香		1999
+				表1：mysql> create table payment(
+    					 -> id int primary key auto_increment,
+    					 -> name char(15),
+					     -> class char(5),	
+    				 	 -> money int,
+    				 插入数据： insert into payment values(1,"唐伯虎","AID001",20000)，(1,"秋香","AID001",21000)					  ，(3,"祝枝山","AID001",22000);
+
+    			表2：mysql> create table student(
+  					     -> stu_id int,
+      	 				 -> name char(15),
+    					 -> money int，
+    					 #设置外键，当前表student字段id跟随payment表字段id，同步更新及删除
+    					 -> foreign key(stu_id) references payment(id)
+    					    on delete cascade 
+    					    on update cascade
+    					 )default charset=utf8;
+		 	 		这时，
+		 	 		只有当表1有记录时，表2才可插入与之相对的记录。表2无法插入表1中没有的记录，这时就用表1来控制表2的记录
+		 	 		注意：主表id和从表的id要一一对应才可，值上要对应		 	 
+
+		 	级联动作:
+		 	 		cascade 	数据级联更新		说明：主表更新删除，从表随着更新删除
+		 	 		restrict 	默认 			说明：当删除或更新主表时，如果从表有与之相关联记录则不允许主表删除
+
+		 	删除外键：
+		 			alter table 表名 drop foreign key 外键名;
+
+		 	查看外键：show create table 表名;
+
+		 	在已有表中添加外键：
+		 			PS：会受到已有数据限制			
+		 			格式：
+		 			alter table 表名 add 
+		 			foreign key（参考字段名）references 被参考表名(被参考字段) 
+		 			on delete 级联动作	 	  
+		 			on update 级联动作;
+			
 
 
 
