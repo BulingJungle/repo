@@ -2804,7 +2804,7 @@ MySQLday02:
 		eg.  delete from hero where id=1;	删除id=1的记录	
 
 		3）更新表记录	
-		   UPDATE 表名称 SET 列名称 = 新值 WHERE 列名称 = 某值
+		   UPDATE 表 名称 SET 列名称 = 新值 WHERE 列名称 = 某值
 		   注意：一定要添加where条件子句，否则全部将被修改 
 		   eg.update hero set country="蜀国" where name="曹操";
 			
@@ -3109,7 +3109,7 @@ MySQLday02:
 
 		课后面试题：mysql > select use_id,count(commit_id) from comment
    					 -> group by use_id
-    				  	 -> order by count(commit_id) desc
+    				 -> order by count(commit_id) desc
    					 -> limit 10;
 
 	索引
@@ -3163,7 +3163,7 @@ MySQLday02:
 							 	）；
 							 eg.mysql>  create table t1(
   	  								-> id int primary key auto_increment,
-  								    -> name char(20))auto_increment=10;		#指定id从10开始编号
+  								    -> name char(20)) auto_increment=10;		#指定id从10开始编号
 								Query OK, 0 rows affected (0.06 sec)
 
 								mysql> desc t1;	
@@ -3316,22 +3316,158 @@ MySQLday02:
  	    	insert into xian values(1,"132100","正定县","131100"),(2,"132102","浦东新区","131112"),(3,"132103","武昌区","131108"),
  	    	(4,"132104","哈哈","131115"),(5,"132105","安新县","131114"),(6,"132106","容城县","131114"),(7,"132107","雄县","131114"),(8,"132108","嘎嘎","131115");
 
- 	    连接查询（多张表连接起来查询）：
+
+ 	    连接查询（多张表连接起来查询，形成一张“大表”）：
 
  	    	1.内连接
- 	    		从表中不显示与被连接表中未匹配到的记录
+ 	    		表中不显示与被连接表中未匹配到的记录
  	    		语法：
  	    			select 字段名/字段名列表 from 表1
- 	    			inner join 表2 on 条件 inner join 表3 on 条件 ...
+ 	    			inner join 表2 on 条件 
+ 	    			inner join 表3 on 条件 
+ 	    			...
+ 	    		实例：
+ 	    			现在有一个表sheng，表city在数据库中。
+ 	    			1.显示省市的详细信息
+ 	    			mysql > select sheng.S_name,city.c_name from sheng
+    					 -> inner join city
+     					 -> on sheng.s_id = city.cfather_id;
+     				该例子通过内连接连接起来了，通过省的代码连接上了
+     				+-----------+--------------+
+					| S_name    | c_name       |
+					+-----------+--------------+
+					| 河北省    | 石家庄市     |
+					| 河北省    | 沧州市       |
+					| 河北省    | 廊坊市       |
+					| 陕西省    | 西安市       |
+					| 四川省    | 成都市       |
+					| 四川省    | 重庆市       |
+					| 广东省    | 广州市       |
+					| 山东省    | 济南市       |
+					| 湖北省    | 武汉市       |
+					| 河南省    | 郑州市       |
+					+-----------+--------------+
+					10 rows in set (0.05 sec)
+
+					2.显示省市县详细信息（三张表进行关联，主要还是用表两两之间的共同字段进行关联）
+					mysql> select sheng.s_name,city.c_name,xian.x_name from sheng
+    				    -> inner join city on s_id=cfather_id
+    					-> inner join xian on c_id=xfather_id;
+					+-----------+--------------+-----------+
+					| s_name    | c_name       | x_name    |
+					+-----------+--------------+-----------+
+					| 河北省    | 石家庄市     | 正定县    |
+					| 湖北省    | 武汉市       | 武昌区    |
+					+-----------+--------------+-----------+
+					2 rows in set (0.03 sec)
+
  	    	2.外连接
  	    		左连接
- 	    		右连接
+ 	    			定义：以左表为主，显示查询结果
+ 	    			语法：
+ 	    				select 字段名列表 from 表1
+ 	    				left join 表2 on 条件
+ 	    			实例：以省表为主，显示详细信息
+ 	    			mysql> select sheng.s_name,city.c_name from sheng
+   					    -> left join city on sheng.s_id=city.cfather_id;
+					+-----------+--------------+
+					| s_name    | c_name       |
+					+-----------+--------------+
+					| 河北省    | 石家庄市     |
+					| 河北省    | 沧州市       |
+					| 河北省    | 廊坊市       |
+					| 陕西省    | 西安市       |
+					| 四川省    | 成都市       |
+					| 四川省    | 重庆市       |
+					| 广东省    | 广州市       |
+					| 山东省    | 济南市       |
+					| 湖北省    | 武汉市       |
+					| 河南省    | 郑州市       |
+					| 海南省    | NULL         |
+					| 云南省    | NULL         |
+					| 山西省    | NULL         |
+					+-----------+--------------+
+					13 rows in set (0.01 sec)
 
+					mysql> select sheng.s_name,city.c_name,xian.x_name from sheng
+    				-> left join city on sheng.s_id=city.cfather_id
+				    -> left join xian on city.c_id=xian.xfather_id;
+					+-----------+--------------+-----------+
+					| s_name    | c_name       | x_name    |
+					+-----------+--------------+-----------+
+					| 河北省    | 石家庄市     | 正定县    |
+					| 河北省    | 沧州市       | NULL      |
+					| 河北省    | 廊坊市       | NULL      |
+					| 陕西省    | 西安市       | NULL      |
+					| 四川省    | 成都市       | NULL      |
+					| 四川省    | 重庆市       | NULL      |
+					| 广东省    | 广州市       | NULL      |
+					| 山东省    | 济南市       | NULL      |
+					| 湖北省    | 武汉市       | 武昌区    |
+					| 河南省    | 郑州市       | NULL      |
+					| 海南省    | NULL         | NULL      |
+					| 云南省    | NULL         | NULL      |
+					| 山西省    | NULL         | NULL      |
+					+-----------+--------------+-----------+
+					13 rows in set (0.01 sec)
 
+ 	    		右连接	
+ 	    			以右表为主，显示查询结果
+ 	    			语法格式：select 字段名列表 from 表1
+ 	    					 right join 表2 on 条件表达式;
+ 	    			mysql> select sheng.s_name,city.c_name,xian.x_name from sheng
+					    -> right join city on sheng.s_id=city.cfather_id
+					    -> right join xian on city.c_id=xian.xfather_id;
+					+-----------+--------------+--------------+
+					| s_name    | c_name       | x_name       |
+					+-----------+--------------+--------------+
+					| 河北省    | 石家庄市     | 正定县       |
+					| NULL      | 上海市       | 浦东新区     |
+					| 湖北省    | 武汉市       | 武昌区       |
+					| NULL      | NULL         | 哈哈         |
+					| NULL      | 雄安新区     | 安新县       |
+					| NULL      | 雄安新区     | 容城县       |
+					| NULL      | 雄安新区     | 雄县         |
+					| NULL      | NULL         | 嘎嘎         |
+					+-----------+--------------+--------------+
+					8 rows in set (0.00 sec) 	    					
 
+					PS：匹配不到的就显示为空
 
+					显示省市县详细信息，要求市全部显示：
+						这涉及到左右连接的混合搭配
+						mysql> select sheng.s_name,city.c_name,xian.x_name from sheng
+					    -> right join city on sheng.s_id = city.cfather_id
+					    -> left join xian on city.c_id=xian.xfather_id;
+						+-----------+--------------+--------------+
+						| s_name    | c_name       | x_name       |
+						+-----------+--------------+--------------+
+						| 河北省    | 石家庄市     | 正定县       |
+						| 河北省    | 沧州市       | NULL         |
+						| 河北省    | 廊坊市       | NULL         |
+						| 陕西省    | 西安市       | NULL         |
+						| 四川省    | 成都市       | NULL         |
+						| 四川省    | 重庆市       | NULL         |
+						| 广东省    | 广州市       | NULL         |
+						| 山东省    | 济南市       | NULL         |
+						| 湖北省    | 武汉市       | 武昌区       |
+						| 河南省    | 郑州市       | NULL         |
+						| NULL      | 北京市       | NULL         |
+						| NULL      | 天津市       | NULL         |
+						| NULL      | 上海市       | 浦东新区     |
+						| NULL      | 哈尔滨市     | NULL         |
+						| NULL      | 雄安新区     | 安新县       |
+						| NULL      | 雄安新区     | 容城县       |
+						| NULL      | 雄安新区     | 雄县         |
+						+-----------+--------------+--------------+
 
+						17 rows in set (0.00 sec)
 
+			多表查询:
+				笛卡尔积查询：	多张表查询
+						 		select * from 表1，表2;
+						 		说明：将表1中的每一条记录与表2中的每一条记录各匹配一次，形成一张大表
+						 		但是，若在此查询语句基础上	，在加上where条件语句后，等同于内连接查询
 
 
 
