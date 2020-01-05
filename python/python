@@ -1018,10 +1018,10 @@ type（）函数：
 	示例：
 		s=set（）
 		s={1,2,3,4}
-		s=set（"abc"）#s={'a','b','c'}
+		s=set（"abc"）#s={'a','b','c'}·
 		s=set({1:"3",2:"4"}) #s={1,2}
 		s=set(range(1:10:3)) #s={1,4,7}
-		注意集合只能以不可变的可迭代对象来进行创建
+		注意集合只能以不可变的可迭代对象来进行创建·
 	集合的运算：
 		交集，并集，补集，子集，超集
 		运算符号：& 生成两个集合的交集     格式：集合1 & 集合2
@@ -2548,7 +2548,7 @@ mysql安装：
 			  show databases;	 
 			 （查看MySQL服务里的数据库有哪些，库里面存放有表。注意：不能删除mysql自带的库）
 			b.创建库（创建库的时候给库指定字符集utf-8才可支持中文）
-			  create database 库名（字段列表） default charset=utf8;		
+			  create database 库名（字段列表） default charset=utf8;	  	
 			c.查看自己创建的库的字符集
 			  show create database 库名;
 			d.查看当前所在库
@@ -3175,7 +3175,7 @@ MySQLday02:
 								+-------+----------+------+-----+---------+----------------+
 								2 rows in set (0.01 sec)
 				在已有表中创建主键：
-						alter table 表名 add primary key（字段名）；
+						alter table 表名 add primary key（字段名） ；
 						添加自增长属性：alter table 表名 modify 字段名 数据类型 auto_increment;				
 
 			删除主键：
@@ -3470,10 +3470,152 @@ MySQLday02:
 						 		但是，若在此查询语句基础上	，在加上where条件语句后，等同于内连接查询
 
 
+			如何连接到远程数据库？
+			MySQL用户账户管理：
+					1.开启远程连接
+						1.获取root权限
+							sudo -i
+						2.切换到配置文件所在路径
+							cd /etc/mysql/mysql.conf/
+						3.vi mysql.cnf(注释本地连接)
+							#bind-address = 127.0.0.1
+							Vi使用：
+									vi刚进去时时浏览模式->按a，进入插入模式->ESC，退出到浏览模式	->shift+:，命令行模式->
+									输入wq，保存并退出
+						4.重启mysql服务			
+					2.添加授权用户 
+						1.使用root用户连接到服务器
+							mysql -uroot -p密码
+						2.添加新的授权用户
+							create user "用户名"@"IP地址" identitfied by "密码"
+							例如：create user "ran"@"%" identified by "123456"
+							IP地址的表示方式：
+								1.%表示任意IP地址都可以连接到服务器
+								2.localhost表示用户只能从本地连接
+								3.其他特定IP，只有与该IP绑定的用户才可连接到服务器
+					3.给用户权限
+						Linux下IP地址查看：ifconfig
+						查看已有用户:select user,host from mysql.user;
+						授权语句：
+							grant 权限列表 on 库名.表名 to "用户名"@"IP地址" with grant option;
+						   （其中的with grant option代表用户可以再次给其他用户授权）
+						    例：
+						    	grant delete,select,alter on 库.表 to "ran"@"IP地址" with grant option;
+						    	最高权限：
+						    		grant all privileges on *.* to "用户名"@"IP地址" with grant option;
+						    权限列表：select，delete，update，insert，alter，drop，create··
+						    *.*代表所有库的所有表都可以操作
+						删除用户：
+							drop user "用户"@"IP地址";
+						练习：
+							1.添加一个用户：monkey，所有人都可以连接，只对myDB库由查询权限
+							2.为monkey用户授权
+							3.验证：mysql -hIP地址 -u用户名 -p密码
+							create user "monkey"@"%" identified by "rjy";
+							grant select on myDB.* to "monkey"@"%" with grant option;
+							mysql -hIP地址 -umonkey -prjy;
 
+			数据备份（linux终端下备份）：
+				1.格式：		mysqldump -uroot -p 原库名 > 路径/xxx.sql
+				2.原库名的表示：
+					--all-databases	    备份所有库
+					库名 				备份单个库
+					-B 库1 库2...		备份多个库
+					库名 表1 表2...		备份指定库中的表
+				3.例子：
+					备份myDB（备份的是sql命令）
+					mysqldump -uroot -p myDB > /home/ran/
 
-			
-			
+			数据恢复：
+				1.格式：mysql -uroot -p 要恢复的目标库名 < 路径/备份文件.sql 
+			 	  注意：要恢复的目标库名必须存在
+			 	2.步骤：
+			 		先备份库->再删除库->再创建空库->再恢复
+			    3.备份分为：完全部分 与 增量备份
+			    		完全备份：mysqldump
+			    		增量备份：binlog日志，xbackup工具
+			    4.如何从所有库的备份文件中只恢复某一个库？
+			    	使用：--one-database
+			    	语法：mysql -uroot -p --one-database 需要恢复的库名（库名需要与原库名一致） < 所有备份.sql
+					备注：
+						若在恢复前，库中有新增的表时，而新增的表没有在备份里，新增表不会因恢复而被覆盖或删除
+						恢复时，必须先创建空库
+
+			事务与事务回滚
+				1.事务的定义：一件事发生的开始到结束整个过程
+				2.作用：确保数据的一致性
+				mysql中sql语句会自动提交到数据库中，而Oracle中却需要管理员输入commit命令后才可提交到数据库
+				在mysql中，使用：show variables like "autocommit"； 可以查看是否设置为了自动提交
+				3.事务应用：
+					a.开启事务
+						mysql> start transaction;
+						mysql> ...一系列sql命令后回车
+						#上面两条执行后，没有提交操作到数据库，因为此时autocommit被禁用了
+					b.终止事务	
+						mysql> commit;	输入此命令后，此时才提交之前的 sql操作
+					c.注意：
+						事务回滚只对表的记录一系列的操作(增删改查)才有作用，对表的创建、库的创建没有作用
+						比如说：银行转账的过程，其中如果某个环节出现了问题就可以回滚来撤销之前的操作，而不对的数据造成修改。
+								保护了数据安全。只有在整个过程没有出现问题后，最终才commit更新数据库，一旦出现了错误可以回滚rollback
+
+			mysql里的存储引擎：
+				1.定义：处理表的处理器
+				2.存储引擎的基本操作：
+					查看已有表的存储引擎：show create table 表名;		#输入该命令后，就可以查看表的存储引擎是什么，即查看其Engine=...
+				3.创建表时指定存储引擎：
+					create table 表名（...） engine=myisam;
+				4.查看所有的存储引擎：
+					show engines\G;	InonDB为默认存储引擎
+				5.InnoDB介绍：
+					Engine: InnoDB
+				     	Support: DEFAULT
+				     	Comment: Supports transactions（支持事务）, row-level locking（行级锁）, and foreign keys（外键）
+					 	Transactions: YES
+				        XA: YES
+				     	Savepoints: YES
+				6.另外一个常用的引擎：
+						Engine: MyISAM
+					     Support: YES
+					     Comment: MyISAM storage engine
+					Transactions: NO
+					          XA: NO
+					  Savepoints: NO
+				7.上述两种引擎区别与特点：
+					innoDB特点：
+						a.共享表空间（存一起）：
+							在/var/lib/mysql/内
+							表名.frm 		储存表结构
+							表名.idb 		表记录和索引信息
+							注意：在学习mysql时的版本较视频中的版本有所更新，里面只有一个frm表（猜测无论是表结构还是记录或是索引都	   存在frm中，更加地共享了）
+						b.支持行级锁
+							比如一条记录在进行操作时，锁住，只能让一个人改。
+					myisam特点：
+						a.独享表空间（分开存）
+							表名.frm 		存表结构
+							表名.myd 		存表记录
+							表名.myi 		存索引信息
+						b.支持表级锁
+				8.锁（mysql自动加锁）：
+					加锁的目的：为了解决客户端并发访问时的冲突问题
+					锁的类型：
+						读锁（select时，又称共享锁）			加了读锁后，每个人都可以查询，但不可改数据。
+						写锁（增删改时，又称互斥锁、排他锁）	有一个人在操作时，其他人都不可操作 	
+					###操作完成后自动释放锁###
+				9.锁粒度	
+					表级锁
+					行级锁
+			   *10.在实际中如何选择引擎？
+					执行查询操作多时，创建表时指定MyISAM为引擎(因为锁表比锁行快得多，Innodb浪费资源)
+					执行写操作多时，使用InnoDB引擎（因为支持行级锁，如果用MyISAM时，一写就把表锁住了，别人就无法操作自己的一条记录）
+				11.如何更改数据库的默认存储引擎：
+					a.sudo -i
+					b.cd /etc/mysql/mysql.conf
+					c.gedit mysql.cnf
+					d.修改内的语句： 	default-storage-engine = myisam  
+					e.保存退出
+					f.重启mysql服务 service mysql restart
+				12.memory存储引擎：
+					表存储在内存中，读写速度快，但表内数据易挥发，断电（或数据库服务重启、关闭）就没了
 	
 		
 
