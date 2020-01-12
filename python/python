@@ -3616,11 +3616,63 @@ MySQLday02:
 					f.重启mysql服务 service mysql restart
 				12.memory存储引擎：
 					表存储在内存中，读写速度快，但表内数据易挥发，断电（或数据库服务重启、关闭）就没了
-	
+					表名.frm 存储表结构
+					注意：重启服务后，表结构在，但表记录会消失
 		
+			MySQL基础查询优化：
+				1.选择合适引擎
+					查询较多的用MyISAM
+					写比较多的用Innodb
+				2.基本SQL语句优化（写好的语句）
+					尽量避免全表查询
+					方法1：建立索引（经常用的字段建立索引）
+					方法2：where语句中，尽量不要使用！=，因为一旦使用索引将不会被使用，而且是全表查询
+					方法3：尽量不要使用NULL来判断，因为一旦使用索引将不会被使用，而且是全表查询。
+						   尽量给NULL赋予默认值，如：0
+						   示例：select id from t1 where number=null
+						   优化：给number字段设置默认值0						 
+					方法4：尽量避免使用or来连接条件，因为也会全表扫描
+						   示例：select id from t1 where id=10 or id=20
+						   优化：select id from t1 where id=10 
+						         union all 
+						         select id from t1 where id=20
+						         #union all 语句将两条语句连接在一起，相当于先后单独执行一次select						  
+					方法5：尽量避免使用前置%，导致全表查询（模糊查询）
+						   示例：select id from t1 where name="%a"
+					方法6：尽量避免使用in 和 not in ，导致全表扫描
+						   示例：select id from t1 where id in（1,2,3）;
+						   优化：可以使用union all来连接 或者 使用between 1 and 3
+					方法7：尽量避免使用*，尽量使用具体字段来查询
+				
+			python数据库编程
+
+				1.python数据库接口
+					用于连接数据库的python接口
+					可以支持的数据库：mysql，Oracle，MongoDB，Sql-Server（python模块不同）
+				2.支持mysql的数据库接口模块
+					python3：pymysql
+					python2：MySQLdb
+				3.pymysql使用流程：
+					a.先连接数据库
+					b.创建游标对象（相当于一个实例）
+					c.使用游标对象的方法操作数据库
+					d.提交commit
+					e.关闭游标对象
+					f.关闭数据库连接
+					示例：
+						#!usr/bin/python
+						import pymysql
+
+						#连接到数据库
+						db=pymysql.connect("localhost","root","rjy","myDB",charset="utf8")
+						#创建游标对象
+						cursor=db.cursor()
+						# 操作游标对象，对数据库进行操作，括号内为sql语句
+						cursor.execute("insert into shool values(1,'zhangsan','Beijing');")
 
 
 
+				
 
 
 
